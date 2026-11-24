@@ -1,0 +1,26 @@
+name: Giữ máy chủ hoạt động
+# GitHub tự tắt lịch chạy của kho công khai nếu 60 ngày không có hoạt động.
+# Mỗi tuần kiểm tra một lần; nếu > 45 ngày chưa có commit thì ghi 1 dòng vào HEARTBEAT.txt.
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          if [ $(( (now - last) / 86400 )) -ge 45 ]; then
+            date -u +"%Y-%m-%dT%H:%M:%SZ" > HEARTBEAT.txt
+            git config user.name "factory-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add HEARTBEAT.txt && git commit -m "keepalive" && git push
+          else
+            echo "Còn hoạt động, không cần commit."
+          fi
