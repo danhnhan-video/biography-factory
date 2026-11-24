@@ -1,0 +1,63 @@
+{
+  "drive_root": "DanhNhan",
+  "voices": {
+    "vi": "hn_male_phuthang_stor80dt_48k-fhg",
+    "en": "Brian",
+    "fr": "fr-FR-Standard-B",
+    "es": "es-US-Standard-B",
+    "ar": "ar-XA-Standard-B",
+    "zh": "cmn-TW-Standard-B"
+  },
+  "speed": 1.0,
+  "speeds": {
+    "en": 0.95,
+    "fr": 0.95,
+    "es": 0.95,
+    "ar": 0.95,
+    "zh": 0.95
+  },
+  "vbee_webhook": "https://example.com/vbee-callback",
+  "contact": "",
+  "youtube": {
+    "auto_upload": false,
+    "privacy": "public",
+    "channels": {
+      "vi": {
+        "secret": "YT_REFRESH_TOKEN",
+        "playlist": "Danh nhân thế giới",
+        "time": "19:00",
+        "tz": "Asia/Ho_Chi_Minh"
+      },
+      "en": {
+        "secret": "YT_REFRESH_TOKEN_EN",
+        "playlist": "World Famous Figures",
+        "time": "19:00",
+        "tz": "America/New_York"
+      },
+      "fr": {
+        "secret": "YT_REFRESH_TOKEN_FR",
+        "playlist": "Grandes figures de l'histoire",
+        "time": "19:00",
+        "tz": "Europe/Paris"
+      },
+      "es": {
+        "secret": "YT_REFRESH_TOKEN_ES",
+        "playlist": "Grandes personajes de la historia",
+        "time": "20:00",
+        "tz": "America/Mexico_City"
+      },
+      "ar": {
+        "secret": "YT_REFRESH_TOKEN_AR",
+        "playlist": "عظماء العالم",
+        "time": "20:00",
+        "tz": "Africa/Cairo"
+      },
+      "zh": {
+        "secret": "YT_REFRESH_TOKEN_ZH",
+        "playlist": "世界名人傳記",
+        "time": "20:00",
+        "tz": "Asia/Taipei"
+      }
+    }
+  }
+}
