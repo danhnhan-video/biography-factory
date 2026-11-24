@@ -1,0 +1,88 @@
+name: Biography Video Factory
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"        # tự kiểm tra DanhNhan/_inbox mỗi 30 phút
+  workflow_dispatch:               # bấm "Run workflow" (cả trên điện thoại) để chạy ngay
+
+concurrency:
+  group: factory
+  cancel-in-progress: false
+
+env:
+  GDRIVE_CLIENT_JSON: ${{ secrets.GDRIVE_CLIENT_JSON }}
+  GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+  VBEE_TOKEN: ${{ secrets.VBEE_TOKEN }}
+  VBEE_APP_ID: ${{ secrets.VBEE_APP_ID }}
+  NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  scan:
+    name: Quét _inbox
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      vi: ${{ steps.scan.outputs.vi }}
+      other: ${{ steps.scan.outputs.other }}
+      has_vi: ${{ steps.scan.outputs.has_vi }}
+      has_other: ${{ steps.scan.outputs.has_other }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -q -r requirements.txt
+      - id: scan
+        run: python -m factory.scan
+
+  render_vi:
+    name: "Dựng ${{ matrix.job.name }}"
+    needs: scan
+    if: needs.scan.outputs.has_vi == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        job: ${{ fromJSON(needs.scan.outputs.vi) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - name: Cài ffmpeg + font
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y ffmpeg fonts-noto-cjk fonts-noto-core fonts-dejavu-core libfribidi0 libraqm0 > /dev/null
+      - run: pip install -q -r requirements.txt
+      - name: Dựng video
+        run: python -m factory.render --id "${{ matrix.job.id }}" --name "${{ matrix.job.name }}"
+      - name: Ghi nhận lỗi (nếu bị huỷ/quá giờ)
+        if: cancelled() || failure()
+        run: python -m factory.render --id "${{ matrix.job.id }}" --name "${{ matrix.job.name }}" --fail
+
+  render_other:
+    name: "Dựng ${{ matrix.job.name }}"
+    needs: [scan, render_vi]
+    if: always() && needs.scan.result == 'success' && needs.scan.outputs.has_other == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        job: ${{ fromJSON(needs.scan.outputs.other) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - name: Cài ffmpeg + font
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y ffmpeg fonts-noto-cjk fonts-noto-core fonts-dejavu-core libfribidi0 libraqm0 > /dev/null
+      - run: pip install -q -r requirements.txt
+      - name: Dựng video
+        run: python -m factory.render --id "${{ matrix.job.id }}" --name "${{ matrix.job.name }}"
+      - name: Ghi nhận lỗi (nếu bị huỷ/quá giờ)
+        if: cancelled() || failure()
+        run: python -m factory.render --id "${{ matrix.job.id }}" --name "${{ matrix.job.name }}" --fail
