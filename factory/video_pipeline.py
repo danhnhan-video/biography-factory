@@ -236,7 +236,7 @@ def commons_info(title: str) -> dict | None:
         ii = (p.get("imageinfo") or [None])[0]
         if ii:
             meta = ii.get("extmetadata", {})
-            artist = re.sub(r"<[^>]+>", "", meta.get("Artist", {}).get("value", "")).strip()
+           artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", meta.get("Artist", {}).get("value", ""))).strip()
             return {"url": ii.get("thumburl") or ii["url"], "width": ii.get("width", 0),
                     "license": meta.get("LicenseShortName", {}).get("value", ""),
                     "credit": f"Wikimedia Commons / {artist}"[:110] if artist else "Wikimedia Commons",
@@ -403,7 +403,7 @@ def render_slide_layers(s: dict, img_path: Path, d: Path):
             x = W - 100 - tlen(dr, ln, f) if rtl else 100
             dtext(dr, (x, y), ln, f, fill=(255, 255, 255, 255)); y += step
     if s.get("image_credit"):
-        c = s["image_credit"][:110]
+        c = " ".join(str(s["image_credit"]).split())[:110]
         lang0 = CUR["lang"]; CUR["lang"] = "en"           # credit luôn là chữ Latin
         f2 = font(20, bold=False, text=c); CUR["lang"] = lang0
         x = 40 if rtl else W - 40 - dr.textlength(c, font=f2)
