@@ -236,7 +236,7 @@ def commons_info(title: str) -> dict | None:
         ii = (p.get("imageinfo") or [None])[0]
         if ii:
             meta = ii.get("extmetadata", {})
-           artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", meta.get("Artist", {}).get("value", ""))).strip()
+            artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", meta.get("Artist", {}).get("value", ""))).strip()
             return {"url": ii.get("thumburl") or ii["url"], "width": ii.get("width", 0),
                     "license": meta.get("LicenseShortName", {}).get("value", ""),
                     "credit": f"Wikimedia Commons / {artist}"[:110] if artist else "Wikimedia Commons",
